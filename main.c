@@ -19,6 +19,44 @@
 
 char textbuffer[4][16];
 
+/* value is either 15 or 240
+	offset av x: ((y/2 <-- avrundas ner)*32 + x)*4
+	tal y: om y%2 = 0 --> 15
+				om y%2 = 1 --> 240
+	*/
+uint8_t square[] = {
+
+	/* Segment for y(0-1) and x(0-7)*/
+	0, 0, 0, 0, 					240, 240, 240, 240,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+
+	/* Segment for y(2-3) and x(0-7)*/
+	0, 0, 0, 0,						0, 0, 0, 0,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+
+	/* Segment for y(4-5) and x(0-7)*/
+	0, 0, 0, 0, 					0, 0, 0, 0,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+
+	/* Segment for y(6-7) and x(0-7)*/
+	0, 0, 0, 0,						0, 0, 0, 0,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+	0, 0, 0, 0, 					0, 0, 0, 0,
+};
+
+
+void PixTrans(int x, int y, uint8_t *square[]){
+
+}
+
+
 static const uint8_t const font[] = {
 	0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -151,6 +189,25 @@ static const uint8_t const font[] = {
 };
 
 const uint8_t const icon[] = {
+/*
+	1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	*/
+
 	255, 255, 255, 255, 255, 255, 127, 187,
 	68, 95, 170, 93, 163, 215, 175, 95,
 	175, 95, 175, 95, 223, 111, 175, 247,
@@ -167,6 +224,27 @@ const uint8_t const icon[] = {
 	142, 123, 134, 127, 134, 121, 134, 121,
 	132, 59, 192, 27, 164, 74, 177, 70,
 	184, 69, 186, 69, 254, 80, 175, 217,
+
+};
+
+const uint8_t const icon2[] = {
+	126, 255, 0, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255,
 };
 
 void delay(int cyc) {
@@ -186,28 +264,28 @@ void display_init() {
 	delay(10);
 	DISPLAY_VDD_PORT &= ~DISPLAY_VDD_MASK;
 	delay(1000000);
-	
+
 	spi_send_recv(0xAE);
 	DISPLAY_RESET_PORT &= ~DISPLAY_RESET_MASK;
 	delay(10);
 	DISPLAY_RESET_PORT |= DISPLAY_RESET_MASK;
 	delay(10);
-	
+
 	spi_send_recv(0x8D);
 	spi_send_recv(0x14);
-	
+
 	spi_send_recv(0xD9);
 	spi_send_recv(0xF1);
-	
+
 	DISPLAY_VBATT_PORT &= ~DISPLAY_VBATT_MASK;
 	delay(10000000);
-	
+
 	spi_send_recv(0xA1);
 	spi_send_recv(0xC8);
-	
+
 	spi_send_recv(0xDA);
 	spi_send_recv(0x20);
-	
+
 	spi_send_recv(0xAF);
 }
 
@@ -217,7 +295,7 @@ void display_string(int line, char *s) {
 		return;
 	if(!s)
 		return;
-	
+
 	for(i = 0; i < 16; i++)
 		if(*s) {
 			textbuffer[line][i] = *s;
@@ -226,19 +304,19 @@ void display_string(int line, char *s) {
 			textbuffer[line][i] = ' ';
 }
 
-void display_image(int x, const uint8_t *data) {
+void display_image(int x, uint8_t *data) {
 	int i, j;
-	
+
 	for(i = 0; i < 4; i++) {
 		DISPLAY_COMMAND_DATA_PORT &= ~DISPLAY_COMMAND_DATA_MASK;
 		spi_send_recv(0x22);
 		spi_send_recv(i);
-		
+
 		spi_send_recv(x & 0xF);
 		spi_send_recv(0x10 | ((x >> 4) & 0xF));
-		
+
 		DISPLAY_COMMAND_DATA_PORT |= DISPLAY_COMMAND_DATA_MASK;
-		
+
 		for(j = 0; j < 32; j++)
 			spi_send_recv(~data[i*32 + j]);
 	}
@@ -251,68 +329,88 @@ void display_update() {
 		DISPLAY_COMMAND_DATA_PORT &= ~DISPLAY_COMMAND_DATA_MASK;
 		spi_send_recv(0x22);
 		spi_send_recv(i);
-		
+
 		spi_send_recv(0x0);
 		spi_send_recv(0x10);
-		
+
 		DISPLAY_COMMAND_DATA_PORT |= DISPLAY_COMMAND_DATA_MASK;
-		
+
 		for(j = 0; j < 16; j++) {
 			c = textbuffer[i][j];
 			if(c & 0x80)
 				continue;
-			
+
 			for(k = 0; k < 8; k++)
 				spi_send_recv(font[c*8 + k]);
 		}
 	}
 }
 
+void moveDoge(){
+	int pos = 0;
+	while (pos < 111) {
+		display_update();
+		display_image(pos, (uint8_t *) icon);
+		pos += 16;
+		delay(10000000);
+		if(pos > 96) {
+			pos = 0;
+		}
+	}
+}
+
 int main(void) {
-	/* Set up peripheral bus clock */
+	// Set up peripheral bus clock
 	OSCCON &= ~0x180000;
 	OSCCON |= 0x080000;
-	
-	/* Set up output pins */
+
+	// Set up output pins
 	AD1PCFG = 0xFFFF;
 	ODCE = 0x0;
 	TRISECLR = 0xFF;
 	PORTE = 0x0;
-	
-	/* Output pins for display signals */
+
+	// Output pins for display signals
 	PORTF = 0xFFFF;
 	PORTG = (1 << 9);
 	ODCF = 0x0;
 	ODCG = 0x0;
 	TRISFCLR = 0x70;
 	TRISGCLR = 0x200;
-	
-	/* Set up input pins */
+
+	// Set up input pins
 	TRISDSET = (1 << 8);
 	TRISFSET = (1 << 1);
-	
-	/* Set up SPI as master */
+
+	// Set up SPI as master
 	SPI2CON = 0;
 	SPI2BRG = 4;
-	
-	/* Clear SPIROV*/
+
+	// Clear SPIROV
 	SPI2STATCLR &= ~0x40;
-	/* Set CKP = 1, MSTEN = 1; */
+	// Set CKP = 1, MSTEN = 1;
         SPI2CON |= 0x60;
-	
-	/* Turn on SPI */
+
+	// Turn on SPI
 	SPI2CONSET = 0x8000;
-	
+
 	display_init();
-	display_string(0, "such world");
-	display_string(1, "much hello");
-	display_string(2, "many text");
-	display_string(3, "wow");
+	//display_string(0, "Hej");
+	//display_string(1, "Lilla");
+	//display_string(2, "Malle");
+	//display_string(3, " ");
 	display_update();
-	
-	display_image(96, icon);
-	
+	//moveDoge();
+
+	display_image(0, (uint8_t *) square);
+	//display_image(32, square);
+	//display_image(64, square);
+	//display_image(96, square);
+
+
+
+	//display_image(32, icon);
+
 	for(;;) ;
 	return 0;
 }
-
